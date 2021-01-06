@@ -22,6 +22,7 @@ class _UnitConverterState extends State<UnitConverter> {
   String _convertedValue = '';
   List<DropdownMenuItem> _unitMenuItems = [];
   bool _showValidationErrors = false;
+  final _inputKey = GlobalKey(debugLabel: 'inputText');
   bool _showErrorUI = false;
 
   @override
@@ -33,12 +34,12 @@ class _UnitConverterState extends State<UnitConverter> {
 
   @override
   void didUpdateWidget(covariant UnitConverter oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.category != oldWidget.category) {
       _createDropdownMenuItems();
       _setDefaults();
     }
     _updateConversion();
-    super.didUpdateWidget(oldWidget);
   }
 
   void _createDropdownMenuItems() {
@@ -134,12 +135,47 @@ class _UnitConverterState extends State<UnitConverter> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showErrorUI) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.all(32.0),
+            decoration: BoxDecoration(
+              color: widget.category.color['error'],
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 180.0,
+                  color: Colors.white,
+                ),
+                Text(
+                  "Oh no! We can't connect right now!",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline4
+                      .copyWith(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     Widget inputBlock = Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
         child: Column(
           children: [
             TextFormField(
+              key: _inputKey,
               initialValue: _inputValue?.toString() ?? '',
               decoration: InputDecoration(
                 labelText: 'Input',
@@ -198,7 +234,8 @@ class _UnitConverterState extends State<UnitConverter> {
       ),
     );
 
-    Widget portraitUI = Column(
+    Widget portraitUI = ListView(
+      padding: EdgeInsets.all(16.0),
       children: <Widget>[
         inputBlock,
         RotatedBox(
@@ -209,60 +246,29 @@ class _UnitConverterState extends State<UnitConverter> {
       ],
     );
 
-    Widget landscapeUI = Flex(
-      direction: Axis.horizontal,
-      children: <Widget>[
-        Expanded(flex: 1, child: inputBlock),
-        Icon(Icons.compare_arrows, size: 40.0),
-        Expanded(flex: 1, child: outputBlock),
+    Widget landscapeUI = ListView(
+      padding: EdgeInsets.all(16.0),
+      children: [
+        Flex(
+          direction: Axis.horizontal,
+          children: <Widget>[
+            Expanded(flex: 1, child: inputBlock),
+            Icon(Icons.compare_arrows, size: 40.0),
+            Expanded(flex: 1, child: outputBlock),
+          ],
+        )
       ],
     );
 
     bool isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
 
-    Widget errorUI = Center(
-      child: Container(
-        padding: EdgeInsets.all(32.0),
-        decoration: BoxDecoration(
-          color: widget.category.color['error'],
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 180.0,
-              color: Colors.white,
-            ),
-            Text(
-              "Oh no! We can't connect right now!",
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .headline4
-                  .copyWith(color: Colors.white),
-            ),
-          ],
-        ),
-      ),
-    );
-
     Widget unitConverterUI;
-    if (_showErrorUI)
-      unitConverterUI = errorUI;
-    else if (isPortrait)
+    if (isPortrait)
       unitConverterUI = portraitUI;
     else
       unitConverterUI = landscapeUI;
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: unitConverterUI,
-      ),
-    );
+    return unitConverterUI;
   }
 }

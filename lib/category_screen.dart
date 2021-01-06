@@ -122,33 +122,33 @@ class _CategoryScreenState extends State<CategoryScreen> {
       });
   }
 
-  Widget _buildCategoriesWidget(Orientation deviceOrientation) {
-    Widget categoriesWidget;
-    if (deviceOrientation == Orientation.portrait) {
-      categoriesWidget = ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return CategoryTile(
-            category: _categories[index],
-            onTap: _onCategoryTap,
-          );
-        },
-        itemCount: _categories.length,
-      );
-    } else {
-      categoriesWidget = GridView.count(
-        crossAxisCount: 2,
-        childAspectRatio: 3.0,
-        children: _categories.map((Category category) {
-          return CategoryTile(
-            category: category,
-            onTap: _onCategoryTap,
-          );
-        }).toList(),
-      );
-    }
+  Widget _buildCategoriesWidget() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 48.0),
-      child: categoriesWidget,
+      child: OrientationBuilder(builder: (context, orientation){
+        if (orientation == Orientation.portrait) {
+          return ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return CategoryTile(
+                category: _categories[index],
+                onTap: _onCategoryTap,
+              );
+            },
+            itemCount: _categories.length,
+          );
+        } else {
+          return GridView.count(
+            crossAxisCount: 2,
+            childAspectRatio: 3.0,
+            children: _categories.map((Category category) {
+              return CategoryTile(
+                category: category,
+                onTap: _onCategoryTap,
+              );
+            }).toList(),
+          );
+        }
+      }),
     );
   }
 
@@ -170,7 +170,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
       frontPanel: _currentCategory == null
           ? UnitConverter(category: _defaultCategory)
           : UnitConverter(category: _currentCategory),
-      backPanel: _buildCategoriesWidget(MediaQuery.of(context).orientation),
+      backPanel: _buildCategoriesWidget(),
       frontTitle: Text('Unit Converter'),
       backTitle: Text('Select a category'),
     );
