@@ -269,6 +269,34 @@ class _UnitConverterState extends State<UnitConverter> {
     else
       unitConverterUI = landscapeUI;
 
-    return unitConverterUI;
+    return DismissKeyboardOnScroll(child: unitConverterUI);
+  }
+}
+
+class DismissKeyboardOnScroll extends StatelessWidget {
+  final Widget child;
+  final Function onDismiss;
+
+  const DismissKeyboardOnScroll({
+    Key key,
+    this.child,
+    this.onDismiss,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollStartNotification>(
+      onNotification: (scrollStartNotification) {
+        if (scrollStartNotification.dragDetails == null) {
+          return true;
+        }
+        FocusScope.of(context).unfocus();
+        if (onDismiss != null) {
+          onDismiss();
+        }
+        return true;
+      },
+      child: child,
+    );
   }
 }
